@@ -4,6 +4,7 @@ import cors from 'cors';
 import { isDbConfigured, connectDb } from './lib/db.js';
 import stonesRouter from './routes/stones.js';
 import enquiriesRouter from './routes/enquiries.js';
+import ordersRouter from './routes/orders.js';
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.get('/health', async (_req, res) => {
 
 app.use('/stones', stonesRouter);
 app.use('/enquiries', enquiriesRouter);
+app.use('/orders', ordersRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found', path: req.originalUrl });

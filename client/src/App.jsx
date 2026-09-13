@@ -7,6 +7,7 @@ import FloatingWidgets from './components/FloatingWidgets.jsx';
 
 import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
+import Transportation from './pages/Transportation.jsx';
 import StoneRange from './pages/StoneRange.jsx';
 import StoneDetail from './pages/StoneDetail.jsx';
 import StoneProducts from './pages/StoneProducts.jsx';
@@ -31,6 +32,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/transportation" element={<Transportation />} />
           <Route path="/stone-range" element={<StoneRange />} />
           <Route path="/stone-range/:slug" element={<StoneDetail />} />
           <Route path="/stone-products" element={<StoneProducts />} />

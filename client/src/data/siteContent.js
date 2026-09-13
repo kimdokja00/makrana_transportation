@@ -53,6 +53,7 @@ export const SITE = {
 export const NAV_LINKS = [
   { label: 'Home', to: '/' },
   { label: 'About', to: '/about' },
+  { label: 'Transportation', to: '/transportation' },
   { label: 'Stone Range', to: '/stone-range' },
   { label: 'Stone Products', to: '/stone-products' },
   { label: 'Contact', to: '/contact' },
@@ -64,6 +65,7 @@ export const FOOTER_TEXT =
 export const FOOTER_LINKS = [
   { label: 'Home', to: '/' },
   { label: 'About Us', to: '/about' },
+  { label: 'Transportation', to: '/transportation' },
   { label: 'Stone Range', to: '/stone-range' },
   { label: 'Stone Products', to: '/stone-products' },
   { label: 'Contact', to: '/contact' },

@@ -52,4 +52,9 @@ export function submitEnquiry(payload) {
   return request('/enquiries', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export default { fetchStones, fetchStone, submitEnquiry };
+/** POST /api/orders */
+export function submitOrder(payload) {
+  return request('/orders', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export default { fetchStones, fetchStone, submitEnquiry, submitOrder };
