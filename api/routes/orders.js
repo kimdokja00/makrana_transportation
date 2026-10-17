@@ -20,10 +20,10 @@ function generateOrderNumber() {
  * POST /api/orders
  * Body: {
  *   fullName, phone, email, companyName?,
- *   pickupCity, pickupAddress, pickupPin?,
  *   dropCity, dropState, dropAddress, dropPin?,
- *   materialType, quantity, weightTonnes?,
- *   vehicleType, pickupDate, specialInstructions?
+ *   stones: [{ stoneName, slabSize?, slabCount?, quantityTonnes? }],
+ *   arrivedByDate, specialInstructions?,
+ *   pickupCity?, pickupAddress?, pickupPin?, vehicleType?
  * }
  */
 router.post('/', async (req, res) => {
@@ -32,19 +32,22 @@ router.post('/', async (req, res) => {
     phone,
     email,
     companyName,
-    pickupCity,
-    pickupAddress,
-    pickupPin,
     dropCity,
     dropState,
     dropAddress,
     dropPin,
+    stones,
+    arrivedByDate,
+    pickupDate,
+    specialInstructions,
+    // Optional / legacy fields
+    pickupCity,
+    pickupAddress,
+    pickupPin,
+    vehicleType,
     materialType,
     quantity,
     weightTonnes,
-    vehicleType,
-    pickupDate,
-    specialInstructions,
   } = req.body ?? {};
 
   const errors = {};
@@ -52,23 +55,66 @@ router.post('/', async (req, res) => {
   if (!phone?.trim()) errors.phone = 'Phone number is required';
   if (!email?.trim() || !EMAIL_RE.test(email.trim())) errors.email = 'A valid email is required';
 
-  if (!pickupCity?.trim()) errors.pickupCity = 'Pickup city is required';
-  if (!pickupAddress?.trim()) errors.pickupAddress = 'Pickup address is required';
-
   if (!dropCity?.trim()) errors.dropCity = 'Destination city is required';
   if (!dropState?.trim()) errors.dropState = 'Destination state is required';
   if (!dropAddress?.trim()) errors.dropAddress = 'Destination address is required';
 
-  if (!materialType?.trim()) errors.materialType = 'Material/Cargo type is required';
-  if (!quantity?.trim()) errors.quantity = 'Quantity or volume is required';
-  if (!vehicleType?.trim()) errors.vehicleType = 'Vehicle type is required';
-  if (!pickupDate?.trim()) errors.pickupDate = 'Pickup date is required';
+  const effectiveArrivalDate = (arrivedByDate || pickupDate || '').trim();
+  if (!effectiveArrivalDate) {
+    errors.arrivedByDate = 'Arrived by date is required';
+  }
+
+  // Parse and validate stones array
+  let parsedStones = [];
+  if (Array.isArray(stones) && stones.length > 0) {
+    parsedStones = stones
+      .map((item) => ({
+        stoneName: String(item.stoneName || '').trim(),
+        slabSize: String(item.slabSize || '').trim(),
+        slabCount: String(item.slabCount || '').trim(),
+        quantityTonnes: String(item.quantityTonnes || '').trim(),
+      }))
+      .filter((item) => item.stoneName);
+
+    if (!parsedStones.length) {
+      errors.stones = 'Please select at least one stone and specify slab size, slab count, or tonnes';
+    }
+  } else if (materialType?.trim()) {
+    // Backwards compatibility with legacy single material payload
+    parsedStones = [
+      {
+        stoneName: materialType.trim(),
+        slabSize: '',
+        slabCount: quantity?.trim() || '',
+        quantityTonnes: weightTonnes?.trim() || '',
+      },
+    ];
+  } else {
+    errors.stones = 'Please add at least one stone to your cargo details';
+  }
 
   if (Object.keys(errors).length) {
     return res.status(400).json({ error: 'Validation failed', errors });
   }
 
   const orderNumber = generateOrderNumber();
+
+  // Generate convenient summary strings for quick view
+  const summaryMaterial = parsedStones.map((s) => s.stoneName).join(', ');
+  const summaryQuantity = parsedStones
+    .map((s) => {
+      const parts = [];
+      if (s.slabSize) parts.push(`Size: ${s.slabSize}`);
+      if (s.slabCount) parts.push(`${s.slabCount} Slabs`);
+      if (s.quantityTonnes) parts.push(`${s.quantityTonnes} Tonnes`);
+      return `${s.stoneName}${parts.length ? ` (${parts.join(', ')})` : ''}`;
+    })
+    .join('; ');
+
+  const summaryWeight = parsedStones
+    .map((s) => s.quantityTonnes)
+    .filter(Boolean)
+    .join(' + ');
 
   const payload = {
     orderNumber,
@@ -77,21 +123,24 @@ router.post('/', async (req, res) => {
     email: email.trim().toLowerCase(),
     companyName: companyName?.trim() || '',
 
-    pickupCity: pickupCity.trim(),
-    pickupAddress: pickupAddress.trim(),
-    pickupPin: pickupPin?.trim() || '',
-
     dropCity: dropCity.trim(),
     dropState: dropState.trim(),
     dropAddress: dropAddress.trim(),
     dropPin: dropPin?.trim() || '',
 
-    materialType: materialType.trim(),
-    quantity: quantity.trim(),
-    weightTonnes: weightTonnes?.trim() || '',
+    pickupCity: pickupCity?.trim() || 'Makrana',
+    pickupAddress: pickupAddress?.trim() || '',
+    pickupPin: pickupPin?.trim() || '',
 
-    vehicleType: vehicleType.trim(),
-    pickupDate: pickupDate.trim(),
+    stones: parsedStones,
+    materialType: summaryMaterial,
+    quantity: summaryQuantity,
+    weightTonnes: summaryWeight || weightTonnes?.trim() || '',
+
+    arrivedByDate: effectiveArrivalDate,
+    pickupDate: effectiveArrivalDate,
+
+    vehicleType: vehicleType?.trim() || '',
     specialInstructions: specialInstructions?.trim() || '',
     status: 'new',
   };

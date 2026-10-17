@@ -8,8 +8,8 @@ import { SITE } from '../data/siteContent.js';
 
 export default function StoneRange() {
   usePageMeta(
-    `Stone Range | Marble, Granite, Sandstone & Minerals in Makrana, Rajasthan`,
-    `Explore the stone range from ${SITE.legalName} — marble, north and south granite, sandstone, limestone, slate and speciality stone supplied across India from Makrana, Rajasthan.`
+    `Stone Range | Marble, Sandstone, Limestone & Cobblestone in Makrana, Rajasthan`,
+    `Explore the stone range from ${SITE.legalName} — marble, sandstone, limestone and cobblestone supplied across India from Makrana, Rajasthan.`
   );
 
   const [stones, setStones] = useState(fallbackStones);

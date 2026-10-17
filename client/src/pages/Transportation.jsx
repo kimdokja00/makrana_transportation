@@ -6,45 +6,35 @@ import { submitOrder } from '../lib/api.js';
 import { usePageMeta } from '../lib/usePageMeta.js';
 import { SITE } from '../data/siteContent.js';
 
+const STONE_OPTIONS = [
+  'Makrana Marble',
+  'Sandstone',
+  'Limestone',
+  'Cobblestone',
+  'Other Stone / Minerals',
+];
+
+const DEFAULT_STONE_ITEM = {
+  stoneName: 'Makrana Marble',
+  slabSize: '',
+  slabCount: '',
+  quantityTonnes: '',
+};
+
 const INITIAL_FORM = {
   fullName: '',
   phone: '',
   email: '',
   companyName: '',
-  pickupCity: 'Makrana',
-  pickupAddress: 'RIICO Industrial Area, Bidyand Road',
-  pickupPin: '341505',
   dropCity: '',
   dropState: '',
   dropAddress: '',
   dropPin: '',
-  materialType: 'Makrana White Marble Slabs / Tiles',
-  quantity: '',
-  weightTonnes: '',
-  vehicleType: '12 Wheeler Truck (21 - 25 Tonnes)',
-  pickupDate: '',
+  stones: [{ ...DEFAULT_STONE_ITEM }],
+  arrivedByDate: '',
   specialInstructions: '',
   website: '', // honeypot
 };
-
-const MATERIAL_OPTIONS = [
-  'Makrana White Marble Slabs / Tiles',
-  'Granite Slabs & Tiles',
-  'Sandstone / Kota Stone / Slate',
-  'Quarry Raw Stone & Marble Blocks',
-  'Industrial Minerals (Calcite, Dolomite, Quartz)',
-  'Heavy Machinery & Quarry Equipment',
-  'General Freight / Other Cargo',
-];
-
-const VEHICLE_OPTIONS = [
-  '10 Wheeler Truck (16 - 20 Tonnes)',
-  '12 Wheeler Truck (21 - 25 Tonnes)',
-  '14 / 16 Wheeler Multi-Axle (28 - 35 Tonnes)',
-  'Heavy Flatbed Trailer (35 - 45 Tonnes)',
-  '6 Wheeler LCV (7 - 10 Tonnes)',
-  'Open High-Side Body Truck',
-];
 
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -110,6 +100,31 @@ export default function Transportation() {
     }
   };
 
+  const handleStoneChange = (index, field, value) => {
+    setForm((prev) => {
+      const nextStones = [...prev.stones];
+      nextStones[index] = { ...nextStones[index], [field]: value };
+      return { ...prev, stones: nextStones };
+    });
+    if (errors.stones) {
+      setErrors((prev) => ({ ...prev, stones: undefined }));
+    }
+  };
+
+  const addStone = () => {
+    setForm((prev) => ({
+      ...prev,
+      stones: [...prev.stones, { ...DEFAULT_STONE_ITEM, stoneName: STONE_OPTIONS[0] }],
+    }));
+  };
+
+  const removeStone = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      stones: prev.stones.filter((_, i) => i !== index),
+    }));
+  };
+
   const validate = () => {
     const nextErrors = {};
     if (!form.fullName.trim()) nextErrors.fullName = 'Please enter your full name';
@@ -118,97 +133,87 @@ export default function Transportation() {
       nextErrors.email = 'Please enter a valid email address';
     }
 
-    if (!form.pickupCity.trim()) nextErrors.pickupCity = 'Pickup city is required';
-    if (!form.pickupAddress.trim()) nextErrors.pickupAddress = 'Pickup address is required';
-
     if (!form.dropCity.trim()) nextErrors.dropCity = 'Destination city is required';
     if (!form.dropState.trim()) nextErrors.dropState = 'Destination state is required';
     if (!form.dropAddress.trim()) nextErrors.dropAddress = 'Destination address is required';
 
-    if (!form.materialType.trim()) nextErrors.materialType = 'Material type is required';
-    if (!form.quantity.trim()) nextErrors.quantity = 'Please specify quantity or volume';
-    if (!form.vehicleType.trim()) nextErrors.vehicleType = 'Please select a vehicle type';
-    if (!form.pickupDate.trim()) nextErrors.pickupDate = 'Please select dispatch / pickup date';
+    if (!form.arrivedByDate.trim()) nextErrors.arrivedByDate = 'Please select arrived by date';
+
+    if (!form.stones || form.stones.length === 0) {
+      nextErrors.stones = 'Please add at least one stone to your order';
+    } else {
+      const hasEmpty = form.stones.some(
+        (s) => !s.stoneName.trim() || (!s.slabSize.trim() && !s.slabCount.trim() && !s.quantityTonnes.trim())
+      );
+      if (hasEmpty) {
+        nextErrors.stones = 'Please mention slab size, slab count, or quantity in tonnes for each stone';
+      }
+    }
 
     return nextErrors;
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    // Honeypot spam check
+  const handleWhatsAppBooking = (event) => {
     if (form.website) {
-      setStatus('submitted');
+      if (event) event.preventDefault();
       return;
     }
 
     const validationErrors = validate();
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) {
-      // Scroll to the first error
+      if (event) event.preventDefault();
       const firstErrorKey = Object.keys(validationErrors)[0];
       const elem = document.querySelector(`[name="${firstErrorKey}"]`);
       if (elem) elem.focus();
-      return;
+      return false;
     }
 
-    setStatus('submitting');
-    setServerError('');
+    // Record order in MongoDB in background so no customer booking is lost
+    submitOrder({
+      fullName: form.fullName,
+      phone: form.phone,
+      email: form.email,
+      companyName: form.companyName,
+      dropCity: form.dropCity,
+      dropState: form.dropState,
+      dropAddress: form.dropAddress,
+      dropPin: form.dropPin,
+      stones: form.stones,
+      arrivedByDate: form.arrivedByDate,
+      specialInstructions: form.specialInstructions,
+    }).catch((err) => {
+      console.warn('[Transportation] Background order recording skipped:', err.message);
+    });
 
-    try {
-      const response = await submitOrder({
-        fullName: form.fullName,
-        phone: form.phone,
-        email: form.email,
-        companyName: form.companyName,
-        pickupCity: form.pickupCity,
-        pickupAddress: form.pickupAddress,
-        pickupPin: form.pickupPin,
-        dropCity: form.dropCity,
-        dropState: form.dropState,
-        dropAddress: form.dropAddress,
-        dropPin: form.dropPin,
-        materialType: form.materialType,
-        quantity: form.quantity,
-        weightTonnes: form.weightTonnes,
-        vehicleType: form.vehicleType,
-        pickupDate: form.pickupDate,
-        specialInstructions: form.specialInstructions,
-      });
-
-      const orderData = response?.data || {
-        orderNumber: `JMT-${Date.now().toString(36).toUpperCase()}`,
-        ...form,
-      };
-
-      setConfirmedOrder(orderData);
-      setStatus('submitted');
-      setForm(INITIAL_FORM);
-    } catch (err) {
-      console.error('[Transportation] Order submission failed:', err);
-      setStatus('error');
-      setServerError(err.message || 'Unable to submit your transport order. Please contact us directly.');
-      setErrors(err.errors || {});
-    }
   };
 
   const createWhatsAppOrderLink = (order) => {
+    const activeStones = order?.stones || form.stones || [];
+    const stonesSummary = activeStones
+      .map((s, idx) => {
+        const details = [];
+        if (s.slabSize) details.push(`Size: ${s.slabSize}`);
+        if (s.slabCount) details.push(`Slabs: ${s.slabCount}`);
+        if (s.quantityTonnes) details.push(`Weight: ${s.quantityTonnes}`);
+        return `   ${idx + 1}. *${s.stoneName}* ${details.length ? `(${details.join(', ')})` : ''}`;
+      })
+      .join('\n');
+
     const text = encodeURIComponent(
       `*New Transport Booking Request - Jammu Makrana Transport*\n` +
       `-----------------------------------------\n` +
       `*Booking Ref:* ${order?.orderNumber || 'Pending'}\n` +
       `*Customer:* ${order?.fullName || form.fullName}\n` +
       `*Phone:* ${order?.phone || form.phone}\n` +
-      (order?.companyName ? `*Company:* ${order.companyName}\n` : '') +
-      `*From:* ${order?.pickupCity || form.pickupCity}\n` +
-      `*To:* ${order?.dropCity || form.dropCity}, ${order?.dropState || form.dropState}\n` +
-      `*Material:* ${order?.materialType || form.materialType}\n` +
-      `*Quantity/Weight:* ${order?.quantity || form.quantity} (${order?.weightTonnes || form.weightTonnes || 'As specified'})\n` +
-      `*Vehicle Type:* ${order?.vehicleType || form.vehicleType}\n` +
-      `*Dispatch Date:* ${order?.pickupDate || form.pickupDate}\n` +
-      (order?.specialInstructions ? `*Notes:* ${order.specialInstructions}\n` : '') +
+      (order?.companyName || form.companyName ? `*Company:* ${order?.companyName || form.companyName}\n` : '') +
+      `*Destination:* ${order?.dropCity || form.dropCity}, ${order?.dropState || form.dropState}\n` +
+      `*Delivery Address:* ${order?.dropAddress || form.dropAddress}\n` +
+      `*Arrived By Date:* ${order?.arrivedByDate || form.arrivedByDate}\n\n` +
+      `*Cargo Stones Ordered:*\n${stonesSummary}\n\n` +
+      (order?.specialInstructions || form.specialInstructions ? `*Notes:* ${order?.specialInstructions || form.specialInstructions}\n` : '') +
       `-----------------------------------------\n` +
-      `Please confirm truck availability and freight rate.`
+      `Please confirm freight quotation and vehicle schedule.`
     );
     return `https://wa.me/${SITE.whatsappNumber}?text=${text}`;
   };
@@ -231,7 +236,7 @@ export default function Transportation() {
               </h2>
               <p className="transport-overview__desc">
                 Under <strong>{SITE.legalName}</strong>, our dedicated logistics division has been
-                moving marble blocks, calibrated tiles, minerals, and industrial cargo since 1985.
+                moving marble slabs, sandstone, limestone, cobblestone, minerals, and industrial cargo since 1985.
                 With our own fleet of heavy-duty multi-axle trucks and flatbed trailers stationed in
                 Makrana, Rajasthan, we guarantee direct point-to-point transit without third-party
                 delays.
@@ -248,94 +253,87 @@ export default function Transportation() {
                 </div>
                 <div className="transport-feature-pill">
                   <Icon name="badge" size={18} />
-                  <span>Serving Since 1985</span>
+                  <span>Since 1985</span>
                 </div>
                 <div className="transport-feature-pill">
-                  <Icon name="shield" size={18} />
-                  <span>Fragile Stone Care</span>
+                  <Icon name="check" size={18} />
+                  <span>GST & E-Way Ready</span>
                 </div>
               </div>
             </div>
 
             <div className="transport-overview__card">
-              <div className="transport-card__header">
-                <BrandMark light />
-                <h3>Fast Freight Assistance</h3>
-                <p>Need urgent truck placement or a custom project quote?</p>
+              <div className="transport-card-stat">
+                <span className="stat-number">40+</span>
+                <span className="stat-label">Years of Heavy Freight Logistics</span>
               </div>
-              <div className="transport-card__body">
-                <div className="transport-card__call-box">
-                  <Icon name="phone" size={20} />
-                  <div>
-                    <span className="label">Call Logistics Desk:</span>
-                    <a href={SITE.phoneHref} className="number">{SITE.phone}</a>
-                  </div>
-                </div>
-                <a
-                  href={SITE.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="thm-btn thm-btn--whatsapp"
-                >
-                  <Icon name="whatsapp" size={18} /> Chat on WhatsApp
-                </a>
+              <div className="transport-card-stat">
+                <span className="stat-number">100%</span>
+                <span className="stat-label">In-House Fleet Ownership</span>
+              </div>
+              <div className="transport-card-stat">
+                <span className="stat-number">Pan-India</span>
+                <span className="stat-label">Doorstep Delivery to 28+ States</span>
+              </div>
+              <div className="transport-card-stat">
+                <span className="stat-number">Makrana</span>
+                <span className="stat-label">Primary Dispatch & Logistics Hub</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Fleet Capabilities Section */}
+      {/* Fleet Capabilities Grid */}
       <section className="transport-fleet">
         <div className="container">
           <div className="section-title text-center">
-            <span className="section-title__tagline">Vehicles & Payload</span>
-            <h2 className="section-title__title">Our Transport Fleet Capabilities</h2>
+            <span className="section-title__tagline">Engineered for Heavy Stone</span>
+            <h2 className="section-title__title">Our Heavy Commercial Fleet</h2>
             <p className="section-title__desc">
-              Tailored carriage solutions for rough quarry blocks, polished tiles, granular minerals, and heavy machinery.
+              Every truck in our fleet is maintained, insured, and operated by veteran long-haul
+              drivers trained specifically in natural stone handling, lashing, and interstate documentation.
             </p>
           </div>
 
           <div className="transport-fleet__grid">
-            {FLEET_HIGHLIGHTS.map((vehicle) => (
-              <div key={vehicle.title} className="fleet-card">
-                <div className="fleet-card__top">
-                  <span className="fleet-card__badge">{vehicle.badge}</span>
-                  <div className="fleet-card__icon">
-                    <Icon name="truck" size={26} />
-                  </div>
+            {FLEET_HIGHLIGHTS.map((item) => (
+              <div key={item.title} className="fleet-card">
+                <div className="fleet-card__header">
+                  <span className="fleet-badge">{item.badge}</span>
+                  <span className="fleet-capacity">{item.capacity}</span>
                 </div>
-                <h3 className="fleet-card__title">{vehicle.title}</h3>
-                <div className="fleet-card__capacity">
-                  <Icon name="weight" size={14} />
-                  <span>Capacity: <strong>{vehicle.capacity}</strong></span>
+                <h3 className="fleet-card__title">{item.title}</h3>
+                <p className="fleet-card__desc">{item.desc}</p>
+                <div className="fleet-card__footer">
+                  <Icon name="check" size={16} />
+                  <span>All-India Carriage Ready</span>
                 </div>
-                <p className="fleet-card__desc">{vehicle.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Main Order Placement Section */}
-      <section className="transport-booking" id="book-order">
+      {/* Main Order Placement Form Section */}
+      <section className="transport-order-section" id="booking-form">
         <div className="container">
-          <div className="transport-booking__wrapper">
-            <div className="section-title text-center">
-              <span className="section-title__tagline">Online Booking</span>
-              <h2 className="section-title__title">Place Your Transportation Order</h2>
-              <p className="section-title__desc">
-                Fill in your pickup, destination, and cargo requirements below. Our dispatch team
-                will review your request, assign the right vehicle, and contact you with confirmation.
+          <div className="transport-order__box">
+            <div className="transport-order__header">
+              <span className="section-title__tagline">Direct Fleet Booking</span>
+              <h3 className="transport-order__title">Place Transportation Order</h3>
+              <p className="transport-order__subtitle">
+                Fill out the delivery destination and specify your stone requirements. You can select
+                multiple stones in a single booking and mention slab sizes, slab counts, or tonnage.
               </p>
             </div>
 
             {status === 'submitted' && confirmedOrder ? (
-              <div className="order-success-card" role="status">
+              <div className="order-success-card">
                 <div className="order-success-card__icon">
-                  <Icon name="check" size={36} />
+                  <Icon name="check" size={38} />
                 </div>
-                <h3 className="order-success-card__title">Transportation Order Placed Successfully!</h3>
+                <h3 className="order-success-card__title">Transport Order Placed Successfully!</h3>
                 <p className="order-success-card__subtitle">
                   Thank you, <strong>{confirmedOrder.fullName}</strong>. Your transport booking reference is:
                 </p>
@@ -347,30 +345,49 @@ export default function Transportation() {
 
                 <div className="order-summary-grid">
                   <div className="order-summary-item">
-                    <span className="label">Origin</span>
-                    <strong>{confirmedOrder.pickupCity}</strong>
-                  </div>
-                  <div className="order-summary-item">
                     <span className="label">Destination</span>
                     <strong>{confirmedOrder.dropCity}, {confirmedOrder.dropState}</strong>
                   </div>
                   <div className="order-summary-item">
-                    <span className="label">Material</span>
-                    <strong>{confirmedOrder.materialType}</strong>
+                    <span className="label">Delivery Address</span>
+                    <strong>{confirmedOrder.dropAddress}</strong>
                   </div>
                   <div className="order-summary-item">
-                    <span className="label">Vehicle Required</span>
-                    <strong>{confirmedOrder.vehicleType}</strong>
-                  </div>
-                  <div className="order-summary-item">
-                    <span className="label">Quantity / Weight</span>
-                    <strong>{confirmedOrder.quantity} {confirmedOrder.weightTonnes ? `(${confirmedOrder.weightTonnes})` : ''}</strong>
-                  </div>
-                  <div className="order-summary-item">
-                    <span className="label">Scheduled Date</span>
-                    <strong>{confirmedOrder.pickupDate}</strong>
+                    <span className="label">Arrived By Date</span>
+                    <strong>{confirmedOrder.arrivedByDate}</strong>
                   </div>
                 </div>
+
+                {/* Stones Summary Table */}
+                {confirmedOrder.stones && confirmedOrder.stones.length > 0 && (
+                  <div className="order-stones-summary">
+                    <h5>Ordered Stone Cargo Details</h5>
+                    <div className="order-stones-table-wrap">
+                      <table className="order-stones-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Stone Type</th>
+                            <th>Size of Slabs</th>
+                            <th>Slab Count</th>
+                            <th>Quantity in Tonne</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {confirmedOrder.stones.map((st, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td><strong>{st.stoneName}</strong></td>
+                              <td>{st.slabSize || 'Standard / On Spec'}</td>
+                              <td>{st.slabCount || '—'}</td>
+                              <td>{st.quantityTonnes || '—'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
 
                 <div className="order-success-card__actions">
                   <a
@@ -394,7 +411,15 @@ export default function Transportation() {
                 </div>
               </div>
             ) : (
-              <form className="transport-form" onSubmit={handleSubmit} noValidate>
+              <form
+                className="transport-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const ok = handleWhatsAppBooking(e);
+                  if (ok) window.open(createWhatsAppOrderLink(form), '_blank');
+                }}
+                noValidate
+              >
                 {status === 'error' && (
                   <div className="alert alert--error" role="alert">
                     <Icon name="close" size={16} />
@@ -469,96 +494,53 @@ export default function Transportation() {
                   </div>
                 </div>
 
-                {/* Section 2: Pickup & Delivery Locations */}
+                {/* Section 2: Delivery Destination */}
                 <div className="form-section">
                   <h4 className="form-section__title">
                     <span className="form-section__step">2</span>
-                    Pickup & Delivery Route
+                    Delivery Destination
                   </h4>
 
-                  <div className="form-route-grid">
-                    {/* Pickup Box */}
-                    <div className="form-route-box">
-                      <h5>
-                        <Icon name="mapPin" size={15} /> Pickup Location (Origin)
-                      </h5>
+                  <div className="delivery-route-box">
+                    <h5>
+                      <Icon name="target" size={16} /> Unloading / Site Delivery Address
+                    </h5>
+
+                    <div className="form-row">
                       <div className="form-field">
-                        <label htmlFor="pickupCity">Pickup City *</label>
+                        <label htmlFor="dropCity">Destination City *</label>
                         <input
-                          id="pickupCity"
+                          id="dropCity"
                           type="text"
-                          name="pickupCity"
-                          placeholder="e.g. Makrana"
-                          value={form.pickupCity}
-                          onChange={update('pickupCity')}
+                          name="dropCity"
+                          placeholder="e.g. Jammu, Delhi, Bengaluru, Mumbai"
+                          value={form.dropCity}
+                          onChange={update('dropCity')}
                           required
                         />
-                        {errors.pickupCity && <span className="form-error">{errors.pickupCity}</span>}
+                        {errors.dropCity && <span className="form-error">{errors.dropCity}</span>}
                       </div>
+
                       <div className="form-field">
-                        <label htmlFor="pickupAddress">Pickup Address / Quarry Site *</label>
-                        <input
-                          id="pickupAddress"
-                          type="text"
-                          name="pickupAddress"
-                          placeholder="e.g. RIICO Industrial Area, Bidyand Road"
-                          value={form.pickupAddress}
-                          onChange={update('pickupAddress')}
+                        <label htmlFor="dropState">Destination State *</label>
+                        <select
+                          id="dropState"
+                          name="dropState"
+                          value={form.dropState}
+                          onChange={update('dropState')}
                           required
-                        />
-                        {errors.pickupAddress && <span className="form-error">{errors.pickupAddress}</span>}
-                      </div>
-                      <div className="form-field">
-                        <label htmlFor="pickupPin">Pincode</label>
-                        <input
-                          id="pickupPin"
-                          type="text"
-                          name="pickupPin"
-                          placeholder="e.g. 341505"
-                          maxLength={6}
-                          value={form.pickupPin}
-                          onChange={update('pickupPin')}
-                        />
+                        >
+                          <option value="">-- Select State --</option>
+                          {INDIAN_STATES.map((st) => (
+                            <option key={st} value={st}>{st}</option>
+                          ))}
+                        </select>
+                        {errors.dropState && <span className="form-error">{errors.dropState}</span>}
                       </div>
                     </div>
 
-                    {/* Destination Box */}
-                    <div className="form-route-box">
-                      <h5>
-                        <Icon name="target" size={15} /> Delivery Location (Destination)
-                      </h5>
-                      <div className="form-row">
-                        <div className="form-field">
-                          <label htmlFor="dropCity">Destination City *</label>
-                          <input
-                            id="dropCity"
-                            type="text"
-                            name="dropCity"
-                            placeholder="e.g. Jammu / Delhi / Bengaluru"
-                            value={form.dropCity}
-                            onChange={update('dropCity')}
-                            required
-                          />
-                          {errors.dropCity && <span className="form-error">{errors.dropCity}</span>}
-                        </div>
-                        <div className="form-field">
-                          <label htmlFor="dropState">Destination State *</label>
-                          <select
-                            id="dropState"
-                            name="dropState"
-                            value={form.dropState}
-                            onChange={update('dropState')}
-                            required
-                          >
-                            <option value="">-- Select State --</option>
-                            {INDIAN_STATES.map((st) => (
-                              <option key={st} value={st}>{st}</option>
-                            ))}
-                          </select>
-                          {errors.dropState && <span className="form-error">{errors.dropState}</span>}
-                        </div>
-                      </div>
-                      <div className="form-field">
+                    <div className="form-row">
+                      <div className="form-field" style={{ flex: 2 }}>
                         <label htmlFor="dropAddress">Complete Delivery Address *</label>
                         <input
                           id="dropAddress"
@@ -571,7 +553,8 @@ export default function Transportation() {
                         />
                         {errors.dropAddress && <span className="form-error">{errors.dropAddress}</span>}
                       </div>
-                      <div className="form-field">
+
+                      <div className="form-field" style={{ flex: 1 }}>
                         <label htmlFor="dropPin">Destination Pincode</label>
                         <input
                           id="dropPin"
@@ -587,98 +570,136 @@ export default function Transportation() {
                   </div>
                 </div>
 
-                {/* Section 3: Cargo & Vehicle Specifications */}
+                {/* Section 3: Cargo Details (Multiple Stones) */}
                 <div className="form-section">
                   <h4 className="form-section__title">
                     <span className="form-section__step">3</span>
-                    Cargo Details & Vehicle Preference
+                    Cargo Details (Select Multiple Stones)
                   </h4>
+                  <p style={{ fontSize: '14px', color: 'var(--thm-gray)', marginBottom: '16px' }}>
+                    Select the stones you wish to include in this order. For each stone, mention the slab dimensions,
+                    total slab count, or total quantity in tonnes.
+                  </p>
 
-                  <div className="form-row">
-                    <div className="form-field">
-                      <label htmlFor="materialType">Material / Cargo Type *</label>
-                      <select
-                        id="materialType"
-                        name="materialType"
-                        value={form.materialType}
-                        onChange={update('materialType')}
-                        required
-                      >
-                        {MATERIAL_OPTIONS.map((mat) => (
-                          <option key={mat} value={mat}>{mat}</option>
-                        ))}
-                      </select>
-                      {errors.materialType && <span className="form-error">{errors.materialType}</span>}
+                  {errors.stones && (
+                    <div className="alert alert--error" style={{ marginBottom: '16px' }}>
+                      <Icon name="close" size={14} />
+                      <span>{errors.stones}</span>
+                    </div>
+                  )}
+
+                  <div className="cargo-stones-container">
+                    <div className="cargo-stones-list">
+                      {form.stones.map((stoneItem, index) => (
+                        <div key={index} className="cargo-stone-card">
+                          <div className="cargo-stone-card__header">
+                            <span className="cargo-stone-card__title">
+                              <span className="cargo-stone-card__badge">{index + 1}</span>
+                              Stone #{index + 1}
+                            </span>
+                            {form.stones.length > 1 && (
+                              <button
+                                type="button"
+                                className="cargo-stone-card__remove"
+                                onClick={() => removeStone(index)}
+                                aria-label={`Remove Stone ${index + 1}`}
+                              >
+                                <Icon name="close" size={12} /> Remove
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="cargo-stone-grid">
+                            <div className="form-field">
+                              <label htmlFor={`stoneName-${index}`}>Stone Type *</label>
+                              <select
+                                id={`stoneName-${index}`}
+                                value={stoneItem.stoneName}
+                                onChange={(e) => handleStoneChange(index, 'stoneName', e.target.value)}
+                              >
+                                {STONE_OPTIONS.map((opt) => (
+                                  <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="form-field">
+                              <label htmlFor={`slabSize-${index}`}>Size of Slabs</label>
+                              <input
+                                id={`slabSize-${index}`}
+                                type="text"
+                                placeholder="e.g. 8x4 ft, 10x6 ft, 18mm"
+                                value={stoneItem.slabSize}
+                                onChange={(e) => handleStoneChange(index, 'slabSize', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="form-field">
+                              <label htmlFor={`slabCount-${index}`}>Slab Count</label>
+                              <input
+                                id={`slabCount-${index}`}
+                                type="text"
+                                placeholder="e.g. 120 Slabs"
+                                value={stoneItem.slabCount}
+                                onChange={(e) => handleStoneChange(index, 'slabCount', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="form-field">
+                              <label htmlFor={`quantityTonnes-${index}`}>Quantity in Tonne</label>
+                              <input
+                                id={`quantityTonnes-${index}`}
+                                type="text"
+                                placeholder="e.g. 15 Tonnes"
+                                value={stoneItem.quantityTonnes}
+                                onChange={(e) => handleStoneChange(index, 'quantityTonnes', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="form-field">
-                      <label htmlFor="vehicleType">Preferred Vehicle Type *</label>
-                      <select
-                        id="vehicleType"
-                        name="vehicleType"
-                        value={form.vehicleType}
-                        onChange={update('vehicleType')}
-                        required
+                    <div>
+                      <button
+                        type="button"
+                        className="btn-add-stone"
+                        onClick={addStone}
                       >
-                        {VEHICLE_OPTIONS.map((veh) => (
-                          <option key={veh} value={veh}>{veh}</option>
-                        ))}
-                      </select>
-                      {errors.vehicleType && <span className="form-error">{errors.vehicleType}</span>}
+                        <Icon name="check" size={14} /> ＋ Add Another Stone to Order
+                      </button>
                     </div>
                   </div>
 
-                  <div className="form-row">
-                    <div className="form-field">
-                      <label htmlFor="quantity">Quantity / Volume *</label>
+                  <div className="form-row" style={{ marginTop: '24px' }}>
+                    <div className="form-field" style={{ flex: 1 }}>
+                      <label htmlFor="arrivedByDate">Arrived By Date *</label>
                       <input
-                        id="quantity"
-                        type="text"
-                        name="quantity"
-                        placeholder="e.g. 4,500 Sq Ft / 2 Raw Blocks / 800 Bags"
-                        value={form.quantity}
-                        onChange={update('quantity')}
-                        required
-                      />
-                      {errors.quantity && <span className="form-error">{errors.quantity}</span>}
-                    </div>
-
-                    <div className="form-field">
-                      <label htmlFor="weightTonnes">Estimated Total Weight (Tonnes)</label>
-                      <input
-                        id="weightTonnes"
-                        type="text"
-                        name="weightTonnes"
-                        placeholder="e.g. 24 Tonnes"
-                        value={form.weightTonnes}
-                        onChange={update('weightTonnes')}
-                      />
-                    </div>
-
-                    <div className="form-field">
-                      <label htmlFor="pickupDate">Preferred Dispatch Date *</label>
-                      <input
-                        id="pickupDate"
+                        id="arrivedByDate"
                         type="date"
-                        name="pickupDate"
-                        value={form.pickupDate}
-                        onChange={update('pickupDate')}
+                        name="arrivedByDate"
+                        min={new Date().toISOString().split('T')[0]}
+                        value={form.arrivedByDate}
+                        onChange={update('arrivedByDate')}
                         required
                       />
-                      {errors.pickupDate && <span className="form-error">{errors.pickupDate}</span>}
+                      <small style={{ fontSize: '12px', color: 'var(--thm-muted)', marginTop: '4px', display: 'block' }}>
+                        Target date by which your shipment needs to arrive at the destination
+                      </small>
+                      {errors.arrivedByDate && <span className="form-error">{errors.arrivedByDate}</span>}
                     </div>
-                  </div>
 
-                  <div className="form-field">
-                    <label htmlFor="specialInstructions">Special Instructions / Handling Notes</label>
-                    <textarea
-                      id="specialInstructions"
-                      name="specialInstructions"
-                      rows={3}
-                      placeholder="e.g. Requires waterproof tarpaulin cover, crane loading assistance, delicate polished marble requiring wooden spacers..."
-                      value={form.specialInstructions}
-                      onChange={update('specialInstructions')}
-                    />
+                    <div className="form-field" style={{ flex: 2 }}>
+                      <label htmlFor="specialInstructions">Special Instructions / Handling Notes</label>
+                      <textarea
+                        id="specialInstructions"
+                        name="specialInstructions"
+                        rows={2}
+                        placeholder="e.g. Need wooden spacers for polished slabs, crane unloading required, specific site contact..."
+                        value={form.specialInstructions}
+                        onChange={update('specialInstructions')}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -695,22 +716,14 @@ export default function Transportation() {
                 />
 
                 <div className="form-submit-row">
-                  <button
-                    type="submit"
-                    className="thm-btn thm-btn--lg"
-                    disabled={status === 'submitting'}
-                  >
-                    <Icon name="truck" size={18} />
-                    {status === 'submitting' ? 'Submitting Booking Order…' : 'Submit Transportation Order'}
-                  </button>
-
                   <a
                     href={createWhatsAppOrderLink(form)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="thm-btn thm-btn--whatsapp thm-btn--lg"
+                    onClick={handleWhatsAppBooking}
                   >
-                    <Icon name="whatsapp" size={18} /> Book via WhatsApp
+                    <Icon name="whatsapp" size={20} /> Book via WhatsApp
                   </a>
                 </div>
               </form>
@@ -731,12 +744,12 @@ export default function Transportation() {
             <div className="step-card">
               <span className="step-card__num">01</span>
               <h4>Place Your Order</h4>
-              <p>Submit your pickup location, cargo size, and destination through our form or WhatsApp.</p>
+              <p>Select your stones, slab sizes or tonnage, destination, and target arrival date through our form or WhatsApp.</p>
             </div>
             <div className="step-card">
               <span className="step-card__num">02</span>
               <h4>Vehicle Allocation</h4>
-              <p>Our fleet manager assigns the ideal truck, confirms freight charges, and schedules arrival.</p>
+              <p>Our fleet manager assigns the ideal truck, confirms freight charges, and schedules transit to meet your arrival date.</p>
             </div>
             <div className="step-card">
               <span className="step-card__num">03</span>
@@ -746,7 +759,7 @@ export default function Transportation() {
             <div className="step-card">
               <span className="step-card__num">04</span>
               <h4>On-Time Delivery</h4>
-              <p>Direct doorstep unloading at your warehouse, quarry, or construction project site across India.</p>
+              <p>Direct doorstep unloading at your warehouse, site, or project location across India by the promised arrival date.</p>
             </div>
           </div>
         </div>

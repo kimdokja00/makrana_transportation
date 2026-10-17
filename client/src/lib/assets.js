@@ -16,10 +16,11 @@
  */
 export const ASSET_BASE = 'https://melangestones.com/assets/images';
 
-/** Build an absolute asset URL from a path stored in the database/seed data. */
 export function asset(path) {
   if (!path) return '';
   if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith('/')) return path;
+  if (/^products\//i.test(path)) return `/${path}`;
   return `${ASSET_BASE}/${String(path).replace(/^\/+/, '')}`;
 }
 

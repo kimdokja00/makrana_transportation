@@ -2768,6 +2768,201 @@ button {
   color: var(--thm-primary);
 }
 
+/* Delivery destination card */
+.delivery-route-box {
+  background-color: #faf9f6;
+  border: 1px solid var(--thm-border);
+  border-radius: var(--radius);
+  padding: 24px 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.delivery-route-box h5 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--thm-black);
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--thm-border);
+}
+
+.delivery-route-box h5 svg {
+  color: var(--thm-primary);
+}
+
+/* Cargo Multi-Stone Selection */
+.cargo-stones-container {
+  display: grid;
+  gap: 16px;
+}
+
+.cargo-stones-list {
+  display: grid;
+  gap: 16px;
+}
+
+.cargo-stone-card {
+  background-color: #faf9f6;
+  border: 1px solid var(--thm-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  transition: all 250ms var(--ease);
+}
+
+.cargo-stone-card:hover {
+  border-color: #d1cfc7;
+}
+
+.cargo-stone-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--thm-border);
+}
+
+.cargo-stone-card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--thm-black);
+  margin: 0;
+}
+
+.cargo-stone-card__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: var(--thm-primary);
+  color: var(--thm-white);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cargo-stone-card__remove {
+  background: none;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #dc3545;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 200ms ease;
+}
+
+.cargo-stone-card__remove:hover {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.cargo-stone-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1.2fr 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 991px) {
+  .cargo-stone-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 575px) {
+  .cargo-stone-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.btn-add-stone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #f3efe6;
+  color: var(--thm-black);
+  border: 1px dashed var(--thm-primary);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 250ms ease;
+  width: fit-content;
+}
+
+.btn-add-stone:hover {
+  background-color: var(--thm-primary);
+  color: var(--thm-white);
+  border-style: solid;
+}
+
+/* Order stones table in confirmation card */
+.order-stones-summary {
+  margin: 24px 0;
+  text-align: left;
+}
+
+.order-stones-summary h5 {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--thm-black);
+  margin-bottom: 12px;
+}
+
+.order-stones-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--thm-border);
+}
+
+.order-stones-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #faf9f6;
+  font-size: 14px;
+}
+
+.order-stones-table th,
+.order-stones-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--thm-border);
+  text-align: left;
+}
+
+.order-stones-table th {
+  background-color: #ece7db;
+  color: var(--thm-black);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.order-stones-table tr:last-child td {
+  border-bottom: none;
+}
+
 .form-submit-row {
   display: flex;
   align-items: center;
