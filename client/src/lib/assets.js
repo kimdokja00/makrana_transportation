@@ -19,9 +19,13 @@ export const ASSET_BASE = 'https://melangestones.com/assets/images';
 export function asset(path) {
   if (!path) return '';
   if (/^https?:\/\//i.test(path)) return path;
-  if (path.startsWith('/')) return path;
-  if (/^products\//i.test(path)) return `/${path}`;
-  return `${ASSET_BASE}/${String(path).replace(/^\/+/, '')}`;
+  const base = import.meta.env.BASE_URL || '/';
+  const cleanBase = base.endsWith('/') ? base : `${base}/`;
+  const cleanPath = String(path).replace(/^\/+/, '');
+  if (/^products\//i.test(cleanPath)) {
+    return `${cleanBase}${cleanPath}`;
+  }
+  return `${ASSET_BASE}/${cleanPath}`;
 }
 
 /** Generic UI icons that carry no third-party branding. */

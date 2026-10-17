@@ -12,6 +12,7 @@
     "dev:api": "node --watch api/dev-server.js",
     "dev:web": "vite",
     "build": "vite build",
+    "build:pages": "vite build && node scripts/build-pages.js",
     "preview": "vite preview",
     "seed": "node api/seed.js"
   },
