@@ -132,6 +132,23 @@ tell what answered.
 
 For a custom domain, add it under **Settings → Domains** and point DNS at Vercel.
 
+### Deploying to GitHub Pages
+
+The live site is `https://<user>.github.io/makrana_transportation/`, published by
+the **Deploy to GitHub Pages** workflow (`.github/workflows/deploy.yml`) on every
+push to `main`. Pages → **Source** must stay set to **GitHub Actions**.
+
+The workflow builds `dist/` with `VITE_BASE=/makrana_transportation/`, copies
+`index.html` to `404.html`, and uploads the artifact at the site root. GitHub
+Pages serves that `404.html` for unrecognised paths, so client-side deep links
+such as `/makrana_transportation/stone-range/marble-manufacturer-in-india` mount
+the SPA instead of a blank page.
+
+Root hosting (Vercel, `npm run preview`, local dev) uses the default `/` base.
+If you deploy the app under a different sub-path, set `VITE_BASE` to it — never
+hard-code it in `vite.config.js`, or root deployments will request their assets
+from a path that does not exist and fail with a MIME-type error.
+
 ## Notes
 
 - Design tokens came from the template the original site used: primary `#9d9482`,

@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig(({ command }) => {
-  const isBuild = command === 'build';
-  const base = process.env.VITE_BASE || (isBuild ? '/makrana_transportation/' : '/');
+export default defineConfig(() => {
+  // Root deployments (Vercel, `vite preview`, local dev) serve assets from `/`.
+  // Sub-path deployments pass VITE_BASE explicitly, e.g. the GitHub Actions
+  // Pages deploy uses VITE_BASE=/makrana_transportation/.
+  const base = process.env.VITE_BASE || '/';
 
   return {
     root: 'client',
