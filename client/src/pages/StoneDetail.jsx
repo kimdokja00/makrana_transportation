@@ -36,21 +36,21 @@ export default function StoneDetail() {
   }, [slug]);
 
   usePageMeta(
-    stone ? `${stone.name} | ${SITE.name} — Makrana, Rajasthan` : `Stone Range | ${SITE.name}`,
+    stone ? `${stone.name} | ${SITE.name} — Makrana, Rajasthan` : `Stones | ${SITE.name}`,
     stone?.description
   );
 
   if (status === 'missing') {
     return (
       <>
-        <PageHeader title="Stone Not Found" crumbs={[{ label: 'Stone Range', to: '/stone-range' }]} />
+        <PageHeader title="Stone Not Found" crumbs={[{ label: 'Stones', to: '/stone-range' }]} />
         <section className="stone-detail">
           <div className="container">
             <div className="empty-state">
               <h2>We couldn&rsquo;t find that stone.</h2>
               <p>It may have been renamed. Browse the full range instead.</p>
               <Link to="/stone-range" className="thm-btn">
-                Back to Stone Range
+                Back to Stones
               </Link>
             </div>
           </div>
@@ -62,7 +62,7 @@ export default function StoneDetail() {
   if (!stone) {
     return (
       <>
-        <PageHeader title="Stone Range" crumbs={[{ label: 'Stone Range', to: '/stone-range' }]} />
+        <PageHeader title="Stones" crumbs={[{ label: 'Stones', to: '/stone-range' }]} />
         <section className="stone-detail">
           <div className="container">
             <div className="stone-range__loading" role="status">
@@ -79,7 +79,7 @@ export default function StoneDetail() {
     <>
       <PageHeader
         title={stone.name}
-        crumbs={[{ label: 'Stone Range', to: '/stone-range' }, { label: stone.name }]}
+        crumbs={[{ label: 'Stones', to: '/stone-range' }, { label: stone.name }]}
       />
 
       <section className="stone-detail">

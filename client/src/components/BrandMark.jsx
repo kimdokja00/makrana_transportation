@@ -14,8 +14,15 @@ export function BrandMark({ light = false, asLink = true }) {
 
   const content = (
     <>
-      <span className="brand-mark__name">Jammu Makrana</span>
-      <span className="brand-mark__sub">Transport &amp; Komal Minerals</span>
+      <img
+        src="/jmtc-logo.jpg"
+        alt="Jammu Makrana Transport Company"
+        className="brand-mark__img"
+      />
+      <span className="brand-mark__text">
+        <span className="brand-mark__name">Jammu Makrana</span>
+        <span className="brand-mark__sub">Transport &amp; Komal Minerals</span>
+      </span>
     </>
   );
 

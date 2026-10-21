@@ -8,8 +8,8 @@ import { SITE } from '../data/siteContent.js';
 
 export default function StoneRange() {
   usePageMeta(
-    `Stone Range | Marble, Sandstone, Limestone & Cobblestone in Makrana, Rajasthan`,
-    `Explore the stone range from ${SITE.legalName} — marble, sandstone, limestone and cobblestone supplied across India from Makrana, Rajasthan.`
+    `Stones | Marble, Sandstone, Limestone & Cobblestone in Makrana, Rajasthan`,
+    `Explore the natural stones from ${SITE.legalName} — marble, sandstone, limestone and cobblestone supplied across India from Makrana, Rajasthan.`
   );
 
   const [stones, setStones] = useState(fallbackStones);
@@ -34,13 +34,13 @@ export default function StoneRange() {
 
   return (
     <>
-      <PageHeader title="Stone Range" crumbs={[{ label: 'Stone Range' }]} />
+      <PageHeader title="Stones" crumbs={[{ label: 'Stones' }]} />
 
       <section className="stone-range">
         <div className="container">
           <div className="section-title section-title--center">
             <span className="section-title__kicker">what we&rsquo;re offering</span>
-            <h2 className="section-title__title">Our Stone Range</h2>
+            <h2 className="section-title__title">Our Stones</h2>
             <p className="section-title__text">
               Natural stone sourced at the quarry, finished in our own Makrana unit, and delivered anywhere in
               India on our own transport fleet &mdash; supplied as blocks, slabs, tiles, steps, columns and

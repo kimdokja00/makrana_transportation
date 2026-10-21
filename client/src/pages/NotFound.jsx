@@ -13,10 +13,10 @@ export default function NotFound() {
         <div className="container">
           <div className="empty-state">
             <h2>This page could not be found.</h2>
-            <p>The link may be out of date. Start from the stone range instead.</p>
+            <p>The link may be out of date. Start from the stones instead.</p>
             <div className="empty-state__actions">
               <Link to="/stone-range" className="thm-btn">
-                Stone Range
+                Stones
               </Link>
               <Link to="/" className="thm-btn thm-btn--outline">
                 Back Home

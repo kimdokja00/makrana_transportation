@@ -29,7 +29,7 @@ export default function About() {
               <p className="profile__text">{ABOUT.intro}</p>
               <p className="profile__text">{ABOUT.intro2}</p>
               <Link to="/stone-range" className="thm-btn">
-                View Stone Range
+                View Stones
               </Link>
             </div>
 

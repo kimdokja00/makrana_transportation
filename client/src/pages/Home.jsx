@@ -147,7 +147,7 @@ export default function Home() {
       </section>
 
       {/* Counters */}
-      <section className="counters" style={{ backgroundImage: `url(${IMAGES.counterPattern})` }}>
+      <section className="counters">
         <div className="container">
           <ul className="counters__grid list-unstyled">
             {COUNTERS.map((counter) => (

@@ -271,13 +271,34 @@ button {
   width: auto;
 }
 
-/* Text lockup standing in for a logo image (see BrandMark.jsx) */
+/* Text lockup with logo image (see BrandMark.jsx) */
 .brand-mark {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+.brand-mark__img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: transform 300ms var(--ease);
+}
+
+.brand-mark:hover .brand-mark__img {
+  transform: scale(1.05);
+}
+
+.brand-mark__text {
   display: inline-flex;
   flex-direction: column;
   justify-content: center;
-  line-height: 1.1;
-  text-decoration: none;
 }
 
 .brand-mark__name {
@@ -287,6 +308,7 @@ button {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   white-space: nowrap;
+  transition: color 200ms ease;
 }
 
 .brand-mark__sub {
@@ -846,9 +868,8 @@ button {
 
 .counters {
   padding: 72px 0;
-  background-color: var(--thm-black);
-  background-size: cover;
-  background-position: center;
+  background-color: #000000;
+  background-image: none;
 }
 
 .counters__grid {
@@ -2400,6 +2421,15 @@ button {
   .advantages__grid,
   .profile-details__grid {
     grid-template-columns: 1fr;
+  }
+
+  .brand-mark {
+    gap: 10px;
+  }
+
+  .brand-mark__img {
+    width: 42px;
+    height: 42px;
   }
 
   .brand-mark__name {
