@@ -30,8 +30,8 @@ function ScrollToTop() {
 export function FloatingWidgets() {
   return (
     <>
-      <Link to="/contact" className="quote-tab" title="Get a Quote">
-        Get a Quote
+      <Link to="/contact" className="quote-tab" title="Contact">
+        Contact
       </Link>
 
       <div className="float-actions">
@@ -64,7 +64,7 @@ export function FloatingWidgets() {
           Call Us
         </a>
         <Link to="/contact" className="btns btns--quote">
-          Get a Quote
+          Contact
         </Link>
       </div>
 

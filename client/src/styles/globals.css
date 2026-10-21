@@ -472,6 +472,16 @@ button {
   color: var(--thm-primary);
 }
 
+.mobile-nav__action {
+  margin-top: 20px;
+}
+
+.mobile-nav__action .thm-btn {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
 .mobile-nav__contact {
   margin-top: 26px;
   display: grid;

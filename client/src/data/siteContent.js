@@ -55,7 +55,6 @@ export const NAV_LINKS = [
   { label: 'About', to: '/about' },
   { label: 'Transportation', to: '/transportation' },
   { label: 'Stones', to: '/stone-range' },
-  { label: 'Contact', to: '/contact' },
 ];
 
 export const FOOTER_TEXT =

@@ -101,7 +101,7 @@ export function Header() {
 
               <div className="main-menu__right">
                 <Link to="/contact" className="thm-btn thm-btn--sm">
-                  Get a Quote
+                  Contact
                 </Link>
                 <button
                   type="button"
@@ -137,6 +137,16 @@ export function Header() {
           <ul className="mobile-nav__list list-unstyled">
             {NAV_LINKS.map((link) => renderLink(link, 'mobile-nav__link', () => setMenuOpen(false)))}
           </ul>
+
+          <div className="mobile-nav__action">
+            <Link
+              to="/contact"
+              className="thm-btn thm-btn--sm"
+              onClick={() => setMenuOpen(false)}
+            >
+              Contact
+            </Link>
+          </div>
 
           <ul className="mobile-nav__contact list-unstyled">
             {SITE.phones.map((phone) => (
