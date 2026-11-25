@@ -1,9 +1,9 @@
 {
-  "name": "melange-stones-mern",
+  "name": "makrana-transportation",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "MERN rebuild of melangestones.com (Stone Range + site shell) deployed on Vercel",
+  "description": "MERN web platform for Jammu Makrana Transport & Komal Minerals Supplier",
   "engines": {
     "node": ">=18.17.0"
   },

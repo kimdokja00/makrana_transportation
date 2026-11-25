@@ -21,7 +21,13 @@ app.use(express.urlencoded({ extended: true }));
  *   - /api/index.js?path=/api/stones    ->  /stones
  */
 app.use((req, _res, next) => {
-  req.url = req.url.replace(/^\/api\/index\.js/, '/').replace(/^\/api(?=\/|$)/, '') || '/';
+  let normalized = req.url
+    .replace(/^\/api\/index\.js(?=\/|\?|$)/, '')
+    .replace(/^\/api(?=\/|\?|$)/, '');
+  if (!normalized || normalized.startsWith('?')) {
+    normalized = `/${normalized}`;
+  }
+  req.url = normalized.replace(/^\/+/, '/');
   next();
 });
 
@@ -48,8 +54,11 @@ app.use((req, res) => {
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
+  if (err?.type === 'entity.parse.failed' || err?.status === 400) {
+    return res.status(400).json({ error: 'Invalid JSON payload' });
+  }
   console.error('[api] unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+  return res.status(500).json({ error: 'Internal server error' });
 });
 
 export default app;

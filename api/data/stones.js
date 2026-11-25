@@ -1,9 +1,7 @@
 /**
  * Stone range catalogue.
  *
- * Images are referenced by path only; the client prefixes the asset base URL
- * (see client/src/lib/assets.js — those images still point at the previous
- * site and must be replaced with your own photography before launch).
+ * Images are referenced by path relative to the client public assets root.
  */
 export const stones = [
   {

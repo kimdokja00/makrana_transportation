@@ -1,28 +1,7 @@
 # Jammu Makrana Transport & Komal Minerals Supplier
 
 MERN (MongoDB, Express, React, Node) website for a Makrana-based house of natural
-stone and minerals, trading since 1985. Built to deploy on Vercel.
-
----
-
-## ⚠️ Before this goes live
-
-The site is visually complete, but three things are **placeholders** that must be
-resolved. None of them block deployment; all of them block going public.
-
-| # | What | Where | Why it matters |
-| - | ---- | ----- | -------------- |
-| 1 | **All photography** | `client/src/lib/assets.js` | Every image is still hot-linked from `melangestones.com` — another firm's server, bandwidth and stock. Replace with your own photos. |
-| 2 | **Email address** | `SITE.email` in `client/src/data/siteContent.js` | Currently `info@example.com`. The contact page and mailto links are dead until this is real. |
-| 3 | **Three counter figures** | `COUNTERS` in `client/src/data/siteContent.js` | "Years in Business" is derived from 1985 and is accurate. Consignments / stone varieties / states reached are invented placeholders — confirm or correct them. |
-
-Already removed, because they could not be reused under any circumstances:
-Melange Stones' logo, their favicons, their clients' logos (the "They Trusted us"
-strip), their social profiles, and all customer testimonials — those were
-attributed to named individuals and were never yours to publish.
-
-To self-host images: put your photos in `client/public/assets/images/`, change
-`ASSET_BASE` to `/assets/images`, and delete the warning comment in `assets.js`.
+stone and minerals, trading since 1985. Built to deploy on Vercel and GitHub Pages.
 
 ---
 
@@ -34,9 +13,9 @@ To self-host images: put your photos in `client/public/assets/images/`, change
 │   ├── dev-server.js       Local listener on :5000 for `npm run dev:api`
 │   ├── lib/db.js           Cached Mongoose connection (serverless-safe)
 │   ├── lib/env.js          Loads .env.local for local dev
-│   ├── models/             Stone, Enquiry
-│   ├── routes/             /stones, /enquiries
-│   ├── data/stones.js      The 10 stones — seed source + API fallback
+│   ├── models/             Stone, Enquiry, Order
+│   ├── routes/             /stones, /enquiries, /orders
+│   ├── data/stones.js      The 4 stones — seed source + API fallback
 │   └── seed.js             `npm run seed`
 ├── client/                 React SPA (Vite)
 │   ├── index.html
@@ -151,12 +130,12 @@ from a path that does not exist and fail with a MIME-type error.
 
 ## Notes
 
-- Design tokens came from the template the original site used: primary `#9d9482`,
-  Roboto, uppercase section taglines with `.1em` tracking, black/white surfaces.
-  The stylesheet is written from scratch rather than copied, so it is yours to
-  own and maintain.
-- The logo is a text lockup (`BrandMark.jsx`) rather than an image. When you have
-  a logo file, drop it in `client/public` and swap the component for an `<img>`.
+- Design tokens: primary `#9d9482`, Roboto typography, uppercase section taglines
+  with `.1em` tracking, and black/white surfaces.
+- The brand emblem uses `client/public/jmtc-logo.jpg` alongside the company title
+  in `BrandMark.jsx`.
+- All UI photography and icons are self-hosted in `client/public/` and resolved
+  through `client/src/lib/assets.js`.
 - `SITE.socials` is empty, so all social blocks hide themselves. Add
   `{ label, href, icon }` entries to switch them on.
 - Reworking the stone range? Edit `api/data/stones.js` (the seed source),

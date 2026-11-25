@@ -1,58 +1,48 @@
 /**
- * Asset URLs.
- *
- * ⚠️  EVERYTHING HERE IS STILL HOT-LINKED FROM melangestones.com
- * ---------------------------------------------------------------------------
- * These are Melange Stones' photographs of their own stock, served from their
- * server at their bandwidth cost. They are kept temporarily so the design can be
- * reviewed, and MUST be replaced before this site goes live:
- *
- *   1. Put your own photos in `client/public/assets/images/`
- *   2. Change ASSET_BASE to '/assets/images'
- *   3. Delete this comment
- *
- * Melange Stones' logo, favicons, partner/client logos and testimonial
- * attributions have already been removed — they cannot be reused at all.
+ * Self-hosted site asset URLs served from `client/public/assets/images/`
+ * and resolved relative to Vite's `BASE_URL`.
  */
-export const ASSET_BASE = 'https://melangestones.com/assets/images';
+function resolveBase() {
+  const base = import.meta.env.BASE_URL || '/';
+  return base.endsWith('/') ? base : `${base}/`;
+}
+
+export const ASSET_BASE = `${resolveBase()}assets/images`;
 
 export function asset(path) {
   if (!path) return '';
-  if (/^https?:\/\//i.test(path)) return path;
-  const base = import.meta.env.BASE_URL || '/';
-  const cleanBase = base.endsWith('/') ? base : `${base}/`;
+  if (/^https?:\/\//i.test(path) || path.startsWith('data:')) return path;
+  const cleanBase = resolveBase();
   const cleanPath = String(path).replace(/^\/+/, '');
-  if (/^products\//i.test(cleanPath)) {
+  if (/^(products|assets|jmtc-logo\.jpg)/i.test(cleanPath)) {
     return `${cleanBase}${cleanPath}`;
   }
   return `${ASSET_BASE}/${cleanPath}`;
 }
 
-/** Generic UI icons that carry no third-party branding. */
 export const UI_ASSETS = {
-  call: `${ASSET_BASE}/call.png`,
-  whatsapp: `${ASSET_BASE}/whatsapp.png`,
+  call: `${ASSET_BASE}/call.svg`,
+  whatsapp: `${ASSET_BASE}/whatsapp.svg`,
 };
 
-/** Background and lifestyle photography — all placeholders, see the note above. */
 export const IMAGES = {
   pageHeaderBg: `${ASSET_BASE}/backgrounds/page-header-bg.jpg`,
-  footerPattern: `${ASSET_BASE}/pattern/pattern-1.webp`,
+  footerPattern: `${ASSET_BASE}/pattern/pattern-1.svg`,
   call: UI_ASSETS.call,
   whatsapp: UI_ASSETS.whatsapp,
   sliders: [
-    `${ASSET_BASE}/backgrounds/main-slider-2-1.webp`,
-    `${ASSET_BASE}/backgrounds/main-slider-2-2.webp`,
-    `${ASSET_BASE}/backgrounds/main-slider-2-3.webp`,
+    `${ASSET_BASE}/backgrounds/main-slider-2-1.jpg`,
+    `${ASSET_BASE}/backgrounds/main-slider-2-2.jpg`,
+    `${ASSET_BASE}/backgrounds/main-slider-2-3.jpg`,
   ],
   welcome: [
-    `${ASSET_BASE}/resources/welcome-two-img-1.webp`,
-    `${ASSET_BASE}/resources/welcome-two-img-2.webp`,
+    `${ASSET_BASE}/resources/welcome-two-img-1.jpg`,
+    `${ASSET_BASE}/resources/welcome-two-img-2.jpg`,
   ],
-  welcomeBg: `${ASSET_BASE}/backgrounds/welcome-two-bg.png`,
-  trustExpertsBg: `${ASSET_BASE}/backgrounds/trust-experts-bg.webp`,
-  counterPattern: `${ASSET_BASE}/pattern/counter-one-pattern.webp`,
-  projectsImg: `${ASSET_BASE}/resources/they-trusted__projects-complete-img.webp`,
+  welcomeBg: `${ASSET_BASE}/backgrounds/welcome-two-bg.svg`,
+  trustExpertsBg: `${ASSET_BASE}/backgrounds/trust-experts-bg.jpg`,
+  counterPattern: `${ASSET_BASE}/pattern/counter-one-pattern.svg`,
+  projectsImg: `${ASSET_BASE}/resources/they-trusted__projects-complete-img.jpg`,
 };
 
 export default asset;

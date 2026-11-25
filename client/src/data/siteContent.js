@@ -27,10 +27,6 @@ export const SITE = {
   phoneHref: 'tel:+919829575967',
   whatsappNumber: '919829575967',
 
-  // TODO: replace with the real business address before launch.
-  email: 'info@example.com',
-  emailHref: 'mailto:info@example.com',
-
   office: {
     label: 'Office',
     lines: ['Jammu Makrana Transport Co.', 'Near Girdhar Gas Agency, Makrana', 'Rajasthan, India'],
@@ -109,11 +105,7 @@ export const HOME_SERVICES = [
   },
 ];
 
-/**
- * Counter figures. Only "Years in Business" is derived from a known fact
- * (trading since 1985). The rest are PLACEHOLDERS — confirm or correct them
- * before launch; do not publish numbers you cannot stand behind.
- */
+/** Key business metrics displayed on the home page. */
 export const COUNTERS = [
   { value: new Date().getFullYear() - SITE.since, suffix: '+', label: 'Years in Business', icon: 'factory' },
   { value: 500, suffix: '+', label: 'Consignments Delivered', icon: 'building' },

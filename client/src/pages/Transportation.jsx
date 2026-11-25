@@ -169,8 +169,7 @@ export default function Transportation() {
       return false;
     }
 
-    // Record order in MongoDB in background so no customer booking is lost
-    submitOrder({
+    const orderSnapshot = {
       fullName: form.fullName,
       phone: form.phone,
       email: form.email,
@@ -182,10 +181,21 @@ export default function Transportation() {
       stones: form.stones,
       arrivedByDate: form.arrivedByDate,
       specialInstructions: form.specialInstructions,
-    }).catch((err) => {
-      console.warn('[Transportation] Background order recording skipped:', err.message);
-    });
+    };
 
+    // Record order in backend so no customer booking is lost, and update confirmation card
+    submitOrder(orderSnapshot)
+      .then((res) => {
+        setConfirmedOrder(res?.data || { ...orderSnapshot, orderNumber: 'WhatsApp Direct' });
+        setStatus('submitted');
+      })
+      .catch((err) => {
+        console.warn('[Transportation] Background order recording skipped:', err.message);
+        setConfirmedOrder({ ...orderSnapshot, orderNumber: 'WhatsApp Direct' });
+        setStatus('submitted');
+      });
+
+    return true;
   };
 
   const createWhatsAppOrderLink = (order) => {
@@ -416,7 +426,7 @@ export default function Transportation() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   const ok = handleWhatsAppBooking(e);
-                  if (ok) window.open(createWhatsAppOrderLink(form), '_blank');
+                  if (ok) window.open(createWhatsAppOrderLink(form), '_blank', 'noopener,noreferrer');
                 }}
                 noValidate
               >

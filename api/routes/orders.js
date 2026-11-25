@@ -69,14 +69,18 @@ router.post('/', async (req, res) => {
   if (Array.isArray(stones) && stones.length > 0) {
     parsedStones = stones
       .map((item) => ({
-        stoneName: String(item.stoneName || '').trim(),
-        slabSize: String(item.slabSize || '').trim(),
-        slabCount: String(item.slabCount || '').trim(),
-        quantityTonnes: String(item.quantityTonnes || '').trim(),
+        stoneName: String(item?.stoneName || '').trim(),
+        slabSize: String(item?.slabSize || '').trim(),
+        slabCount: String(item?.slabCount || '').trim(),
+        quantityTonnes: String(item?.quantityTonnes || '').trim(),
       }))
       .filter((item) => item.stoneName);
 
-    if (!parsedStones.length) {
+    const hasIncompleteStone = parsedStones.some(
+      (item) => !item.slabSize && !item.slabCount && !item.quantityTonnes
+    );
+
+    if (!parsedStones.length || hasIncompleteStone) {
       errors.stones = 'Please select at least one stone and specify slab size, slab count, or tonnes';
     }
   } else if (materialType?.trim()) {

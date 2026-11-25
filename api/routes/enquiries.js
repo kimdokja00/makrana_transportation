@@ -67,9 +67,13 @@ router.get('/', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  await connectDb();
-  const data = await Enquiry.find().sort({ createdAt: -1 }).limit(200).lean({ virtuals: false });
-  return res.json({ count: data.length, data });
+  if (isDbConfigured()) {
+    await connectDb();
+    const data = await Enquiry.find().sort({ createdAt: -1 }).limit(200).lean({ virtuals: false });
+    return res.json({ count: data.length, data });
+  }
+
+  return res.json({ count: memory.length, data: [...memory].reverse() });
 });
 
 export default router;
